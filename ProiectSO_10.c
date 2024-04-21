@@ -88,6 +88,47 @@ void analyzeFiles(const char *path)
     closedir(dir);
 }
 
+void createDirectory(const char *path) 
+{
+    char newDirName[100];
+    printf("Introduceti numele noului director: ");
+    scanf("%s", newDirName);
+    char newDirPath[200];
+    sprintf(newDirPath, "%s/%s", path, newDirName);
+    if (mkdir(newDirPath, 0777) == 0)
+        printf("Directorul \"%s\" a fost creat cu succes.\n", newDirPath);
+    else
+        perror("Eroare la crearea directorului");
+}
+
+void deleteFileOrDirectory(const char *path) 
+{
+    if (remove(path) == 0)
+        printf("%s a fost sters cu succes.\n", path);
+    else
+        perror("Eroare la stergerea fisierului/directorului");
+}
+
+void copyFile(const char *sourcePath, const char *destinationPath) 
+{
+    FILE *sourceFile = fopen(sourcePath, "rb");
+    FILE *destinationFile = fopen(destinationPath, "wb");
+    if (sourceFile == NULL || destinationFile == NULL) 
+    {
+        perror("Eroare la deschiderea fisierelor");
+        return;
+    }
+    char buffer[1024];
+    size_t bytesRead;
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), sourceFile)) > 0) 
+    {
+        fwrite(buffer, 1, bytesRead, destinationFile);
+    }
+    fclose(sourceFile);
+    fclose(destinationFile);
+    printf("Fisierul \"%s\" a fost copiat cu succes in \"%s\".\n", sourcePath, destinationPath);
+}
+
 int main() 
 {
     char path[100];
@@ -99,7 +140,10 @@ int main()
         printf("\nMeniu:\n");
         printf("1. Listare fisiere/directoare\n");
         printf("2. Analiza detaliata a fisierelor\n");
-        printf("3. Iesire\n");
+        printf("3. Creare director nou\n");
+        printf("4. Stergere fisier/director\n");
+        printf("5. Copiere fisier\n");
+        printf("6. Iesire\n");
         printf("Introduceti optiunea dvs.: ");
         scanf("%d", &choice);
         switch (choice) 
@@ -111,12 +155,28 @@ int main()
                 analyzeFiles(path);
                 break;
             case 3:
+                createDirectory(path);
+                break;
+            case 4:
+                deleteFileOrDirectory(path);
+                break;
+            case 5:
+                {
+                    char sourceFilePath[100], destinationFilePath[100];
+                    printf("Introduceti calea fisierului sursa: ");
+                    scanf("%s", sourceFilePath);
+                    printf("Introduceti calea fisierului destinatie: ");
+                    scanf("%s", destinationFilePath);
+                    copyFile(sourceFilePath, destinationFilePath);
+                }
+                break;
+            case 6:
                 printf("Iesire din program.\n");
                 break;
             default:
                 printf("Optiune invalida. Va rugam sa introduceti o optiune valida.\n");
                 break;
         }
-    } while (choice != 3);
+    } while (choice != 6);
     return 0;
 }
