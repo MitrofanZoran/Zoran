@@ -1,1 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_WORD_LEN 100
+#define MAX_LINE_LEN 1000
+
+typedef struct 
+{
+    char word[MAX_WORD_LEN];
+    int count;
+} WordCount;
+
+int compareWordCount(const void *a, const void *b) 
+{
+    return ((WordCount *)b)->count - ((WordCount *)a)->count;
+}
+
+int main() 
+{
+    FILE *file;
+    char filename[100];
+    char buffer[MAX_LINE_LEN];
+    WordCount wordCounts[MAX_LINE_LEN];
+    int wordCount = 0;
+    printf("Introduceti numele fisierului: ");
+    scanf("%s", filename);
+    file = fopen(filename, "r");
+    if (file == NULL) 
+    {
+        perror("Eroare la deschiderea fisierului");
+        return 1;
+    }
+    int isTextFile = 1; 
+    while (fgets(buffer, MAX_LINE_LEN, file) != NULL) 
+    {
+        for (int i = 0; buffer[i] != '\0'; i++) 
+        {
+            if (!isprint(buffer[i])) 
+            { 
+                isTextFile = 0;
+                break;
+            }
+        }
+        if (!isTextFile) 
+        {
+            break;
+        }
+    }
+    rewind(file);
+    if (isTextFile) 
+    {
+        while (fscanf(file, "%s", buffer) != EOF) 
+        {
+            int found = 0;
+            for (int i = 0; i < wordCount; i++) 
+            {
+                if (strcmp(wordCounts[i].word, buffer) == 0) 
+                {
+                    wordCounts[i].count++;
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found) 
+            {
+                strcpy(wordCounts[wordCount].word, buffer);
+                wordCounts[wordCount].count = 1;
+                wordCount++;
+            }
+        }
+        qsort(wordCounts, wordCount, sizeof(WordCount), compareWordCount);
+        printf("Analiza detaliata a fisierului text:\n");
+        printf("Numar de cuvinte: %d\n", wordCount);
+        printf("Cuvinte frecvente:\n");
+        for (int i = 0; i < wordCount && i < 10; i++) 
+        { 
+            printf("%s: %d\n", wordCounts[i].word, wordCounts[i].count);
+        }
+    } 
+    else 
+    {
+        printf("Fisierul este de tip binar.\n");
+    }
+    fclose(file);
+    return 0;
+}
 
